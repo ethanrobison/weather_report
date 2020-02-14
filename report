@@ -1,12 +1,12 @@
 #!/bin/zsh
 
 CHIC=4887398
-WEATHER_KEY=$(cat ./.weatherkey)
+WEATHER_KEY=$(cat .weatherkey)
 
-NEX_KEY=$(cat ./.nexkey)
-NEX_SECRET=$(cat ./.nexsecret)
-NEX_TO=$(cat ./.mynumber)
-NEX_FROM=$(cat ./.fromnumber)
+NEX_KEY=$(cat .nexkey)
+NEX_SECRET=$(cat .nexsecret)
+NEX_TO=$(cat .mynumber)
+NEX_FROM=$(cat .fromnumber)
 
 WEATHER_BASE="https://api.openweathermap.org/data/2.5/"
 
