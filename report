@@ -1,0 +1,74 @@
+#!/bin/zsh
+
+CHIC=4887398
+WEATHER_KEY=$(cat ./.weatherkey)
+
+NEX_KEY=$(cat ./.nexkey)
+NEX_SECRET=$(cat ./.nexsecret)
+NEX_TO=$(cat ./.mynumber)
+NEX_FROM=$(cat ./.fromnumber)
+
+WEATHER_BASE="https://api.openweathermap.org/data/2.5/"
+
+RESP=$(curl -X GET -G "$WEATHER_BASE/forecast/" \
+    -d "appid=$WEATHER_KEY" \
+    -d "id=$CHIC" \
+    -d "units=metric")
+
+JQ_FORMAT="{
+    temp: .main.temp,
+    feels_like: .main.feels_like,
+    weather: .weather[0].main,
+    desc: .weather[0].description,
+    time: .dt_txt
+}"
+
+BOD=2
+EOD=4
+
+CITY=$(echo $RESP | jq -r ".city | { sunrise: .sunrise, sunset: .sunset }")
+BOD_DATA=$(echo $RESP | jq -r ".list | .[$BOD] | $JQ_FORMAT")
+EOD_DATA=$(echo $RESP | jq -r ".list | .[$EOD] | $JQ_FORMAT")
+
+# sunrise/set
+SRIS=$(echo $CITY | jq -r '.sunrise')
+SSET=$(echo $CITY | jq -r '.sunset')
+SRIS_TIME=$(date --date="@$SRIS" +"%H:%m")
+SSET_TIME=$(date --date="@$SSET" +"%H:%m")
+
+# weather BOD
+BOD_TIME=$(date -d "$(echo $BOD_DATA | jq -r '.time') GMT" +"%H:%m")
+BOD_TEMP=$(echo $BOD_DATA | jq -r '.temp')
+BOD_FL=$(echo $BOD_DATA | jq -r '.feels_like')
+BOD_WEATHER=$(echo $BOD_DATA | jq -r '.weather')
+BOD_DESC=$(echo $BOD_DATA | jq -r '.desc')
+
+# weather EOD
+EOD_TIME=$(date -d "$(echo $EOD_DATA | jq -r '.time') GMT" +"%H:%m")
+EOD_TEMP=$(echo $EOD_DATA | jq -r '.temp')
+EOD_FL=$(echo $EOD_DATA | jq -r '.feels_like')
+EOD_WEATHER=$(echo $EOD_DATA | jq -r '.weather')
+EOD_DESC=$(echo $EOD_DATA | jq -r '.desc')
+
+#send message
+
+TODAY=$(date +"%a %D")
+MESSAGE="$TODAY
+rise @ $SRIS_TIME, set @ $SSET_TIME
+
+$BOD_TIME
+$BOD_TEMP, feels like $BOD_FL
+$BOD_WEATHER: $BOD_DESC
+
+$EOD_TIME
+$EOD_TEMP, feels like $EOD_FL
+$EOD_WEATHER: $EOD_DESC"
+
+curl -s -X POST  https://rest.nexmo.com/sms/json \
+    -d "api_key=$NEX_KEY" \
+    -d "api_secret=$NEX_SECRET" \
+    -d "to=$NEX_TO" \
+    -d "from=$NEX_FROM" \
+    -d "text=$MESSAGE"
+
+return 0
