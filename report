@@ -33,8 +33,8 @@ EOD_DATA=$(echo $RESP | jq -r ".list | .[$EOD] | $JQ_FORMAT")
 # sunrise/set
 SRIS=$(echo $CITY | jq -r '.sunrise')
 SSET=$(echo $CITY | jq -r '.sunset')
-SRIS_TIME=$(date --date="@$SRIS" +"%H:%m")
-SSET_TIME=$(date --date="@$SSET" +"%H:%m")
+SRIS_TIME=$(date --date="@$SRIS" +"%H:%M")
+SSET_TIME=$(date --date="@$SSET" +"%H:%M")
 
 # weather BOD
 BOD_TIME=$(date -d "$(echo $BOD_DATA | jq -r '.time') GMT" +"%H:%m")
