@@ -24,7 +24,7 @@ JQ_FORMAT="{
 }"
 
 BOD=2
-EOD=4
+EOD=5
 
 CITY=$(echo $RESP | jq -r ".city | { sunrise: .sunrise, sunset: .sunset }")
 BOD_DATA=$(echo $RESP | jq -r ".list | .[$BOD] | $JQ_FORMAT")
